@@ -1,6 +1,11 @@
 #!flask/bin/python
 # -*- coding: utf-8 -*-
 
+##  To do:
+#   - Delete
+#   - Get por ID.
+
+
 from flask import Flask, jsonify, request, make_response, abort
 from flask.ext.mongoengine import MongoEngine
 from flask.ext.httpauth import HTTPBasicAuth
@@ -54,7 +59,7 @@ def get_users():
     users = User.objects
     for u in users:
         item = {
-            # "id" : u.id,
+            "id" : str(u.id),
             "name" : u.name,
             "email" : u.email,
             "active" : u.active,
@@ -93,19 +98,36 @@ def create_user():
 
 
 
-@app.route('/api/v1/users/<int:user_id>', methods = ['PUT'])
+@app.route('/api/v1/users/<user_id>', methods = ['PUT'])
 def update_user(user_id):
-    print request.json
+    data = request.json
     
     try:
-        to_update = user.objects.get(_id = user_id)
-        print to_update.name
+        to_update = User.objects.get(id = user_id)
+        
+        if 'name' in data:
+            to_update['name'] = data['name']
+
+        if 'email' in data:
+            to_update['email'] = data['email']
+
+        if 'active' in data:
+            to_update['active'] = data['active']
+
+        if 'password' in data:
+            to_update['password'] = hash_password(data['password'])
+
+        if 'registry_date' in data:
+            to_update['registry_date'] = data['registry_date']
+
+
+        to_update.save()
+
     except Exception, e:
         print e
-        
+        return jsonify({'resp': False })
 
-
-    return jsonify({'resp': False })
+    return jsonify({'resp': True })
 
 
 
