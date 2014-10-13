@@ -5,29 +5,20 @@
 #   - Delete
 #   - Get por ID.
 
-
 from flask import Flask, jsonify, request, make_response, abort
 from flask.ext.mongoengine import MongoEngine
 from flask.ext.httpauth import HTTPBasicAuth
 from mongoengine import *
 import pymongo, os, json, uuid, hashlib
+from models.user import *
+from models.patient import *
+from models.image import *
 
 app = Flask(__name__)
 auth = HTTPBasicAuth()
 
-
 # Nos conectamos a la base de datos y 
-# creamos los documentos que utilizaremos 
-
 connect('imageApp')
-
-class User(Document):
-    # id = IntegerField(required = True, unique = True)   # Solo por ahora
-    name = StringField(required = True)
-    password = StringField(required = True)             # Averiguar tipo de dato password
-    email = StringField(required = True, unique=True)                # Averiguar tipo de dato email
-    registry_date = StringField(required = True)        # Averiguar tipo de dato fecha
-    active = BooleanField(default = False)
 
 
 # encriptamos la contraseña que está ingresando, para compararla con la del usuario
@@ -148,3 +139,4 @@ def check_password(hashed_password, user_password):
 
 if __name__ == '__main__':
     app.run(debug = True)
+    # app.run(debug = True, port=50100)
