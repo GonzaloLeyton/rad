@@ -21,13 +21,15 @@ auth = HTTPBasicAuth()
 connect('imageApp')
 
 
+##### ==== USERS ==== ######
+
 # encriptamos la contraseña que está ingresando, para compararla con la del usuario
 @auth.verify_password
 def verify_password(username, password):
     try:
         user = User.objects.get(name = username)
 
-        resp = check_password(user.password, password)
+        resp = user.check_password(password)
 
     except Exception, e:
         return False
@@ -40,7 +42,6 @@ def verify_password(username, password):
 @auth.error_handler
 def unauthorized():
     return make_response(jsonify({ 'error': 'Unauthorized access' } ), 403) 
-
 
 
 @app.route('/api/v1/users', methods = ['GET'])
@@ -65,7 +66,7 @@ def get_users():
 
 @app.route('/api/v1/users', methods = ['POST'])
 def create_user():
-    print request.json
+    # print request.json
     if not request.json or not 'name' in request.json:
         abort(400)
 
@@ -73,7 +74,8 @@ def create_user():
     new_user.name = request.json['name']
     new_user.email = request.json['email']
     new_user.active = request.json['active']
-    new_user.password = hash_password(request.json['password'])
+    new_user.password = request.json['password']
+    new_user.hash_password()
 
     # Acá sacar la fecha y hora actual.
     new_user.registry_date = request.json.get('registry_date', "")
@@ -106,7 +108,8 @@ def update_user(user_id):
             to_update['active'] = data['active']
 
         if 'password' in data:
-            to_update['password'] = hash_password(data['password'])
+            to_update['password'] = data['password']
+            to_update.hash_password()
 
         if 'registry_date' in data:
             to_update['registry_date'] = data['registry_date']
@@ -122,20 +125,17 @@ def update_user(user_id):
 
 
 
-####### Funciones para manipulas contraseñas #############
 
-def hash_password(password, new_salt = False):
-    # uuid is used to generate a random number
-    salt = uuid.uuid4().hex
-    if new_salt:
-        salt = new_salt
+##### ==== PATIENT ==== ######
 
-    return hashlib.sha256(salt.encode() + password.encode()).hexdigest() + ':' + salt
+
+
+
+
+
+
     
-def check_password(hashed_password, user_password):
-    password, salt = hashed_password.split(':')
-    return password == hashlib.sha256(salt.encode() + user_password.encode()).hexdigest()
- 
+
 
 if __name__ == '__main__':
     app.run(debug = True)
