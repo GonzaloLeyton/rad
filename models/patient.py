@@ -3,7 +3,7 @@
 
 from flask.ext.mongoengine import MongoEngine
 from mongoengine import *
-import user
+from user import User
 import pymongo, os, json, uuid, hashlib
 
 class Patient(Document):
@@ -11,8 +11,10 @@ class Patient(Document):
     phone           = StringField(required = True)
     email           = StringField(required = True, unique = True)
     description     = StringField(required = True)
-    groups          = StringField(required = True)
+    groups          = ListField(required = True)
     prevision       = StringField(required = True)
     registry_date   = StringField(required = True)
     active          = BooleanField(default = True)
-    # user            = ReferenceField(User)
+    user            = ReferenceField(User, dbref = False)
+
+Patient.register_delete_rule(User, 'patient', CASCADE)

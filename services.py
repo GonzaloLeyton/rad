@@ -10,9 +10,9 @@ from flask.ext.mongoengine import MongoEngine
 from flask.ext.httpauth import HTTPBasicAuth
 from mongoengine import *
 import pymongo, os, json, uuid, hashlib
-from models.user import *
-from models.patient import *
-from models.image import *
+from models.user import User
+from models.patient import Patient
+from models.image import Image
 
 app = Flask(__name__)
 auth = HTTPBasicAuth()
@@ -20,15 +20,13 @@ auth = HTTPBasicAuth()
 # Nos conectamos a la base de datos y 
 connect('imageApp')
 
-
 ##### ==== USERS ==== ######
 
 # encriptamos la contraseña que está ingresando, para compararla con la del usuario
 @auth.verify_password
 def verify_password(username, password):
     try:
-        user = User.objects.get(name = username)
-
+        user = User.objects.get(email = username)
         resp = user.check_password(password)
 
     except Exception, e:
@@ -45,18 +43,18 @@ def unauthorized():
 
 
 @app.route('/api/v1/users', methods = ['GET'])
-# @auth.login_required
+@auth.login_required
 def get_users():
     resp = []
     users = User.objects
     for u in users:
         item = {
-            "id" : str(u.id),
-            "name" : u.name,
-            "email" : u.email,
-            "active" : u.active,
+            "id"            : u.toString(),
+            "name"          : u.name,
+            "email"         : u.email,
+            "active"        : u.active,
             "registry_date" : u.registry_date,
-            "password" : u.password
+            "password"      : u.password
         }
         resp.append(item)
 
@@ -67,7 +65,7 @@ def get_users():
 @app.route('/api/v1/users', methods = ['POST'])
 def create_user():
     # print request.json
-    if not request.json or not 'name' in request.json:
+    if not request.json or not 'email' in request.json:
         abort(400)
 
     new_user = User()
@@ -114,6 +112,7 @@ def update_user(user_id):
         if 'registry_date' in data:
             to_update['registry_date'] = data['registry_date']
 
+        # En vez de recibir cambio de fecha de registro, es mejor actualizar la fecha, como la fecha en que fue editado el usuario.
 
         to_update.save()
 
@@ -124,15 +123,68 @@ def update_user(user_id):
     return jsonify({'resp': True })
 
 
-
-
 ##### ==== PATIENT ==== ######
 
 
+@app.route('/api/v1/patients', methods=['GET'])
+@auth.login_required
+def get_patients():
+    user_name = auth.username()
+    _user = User.objects.get(email = user_name)
+
+    resp = []
+    patients = Patient.objects.filter(user = _user)
 
 
+    for p in patients:
+        item = {
+            "id"            : str(p.id),
+            "name"          : p.name,
+            "phone"         : p.phone,
+            "email"         : p.email,
+            "description"   : p.description, 
+            "groups"        : p.groups,
+            "prevision"     : p.prevision, 
+            "registry_date" : p.registry_date,
+            "active"        : p.active,
+            "user"          : p.user.toString()
+        }
+        resp.append(item)
+
+    return jsonify({'patients': resp })
+
+    
+@app.route('/api/v1/patients', methods = ['POST'])
+def create_patient():
+    # print request.json
+    if not request.json or not 'name' in request.json:
+        abort(400)
+
+    user_name = auth.username()
+    _user = User.objects.get(email = user_name)
 
 
+    new_patient             = Patient()
+    new_patient.name        = request.json['name']
+    new_patient.phone       = request.json['phone']
+    new_patient.email       = request.json['email']
+    new_patient.description = request.json['description']
+    new_patient.groups      = request.json['groups']
+    new_patient.prevision   = request.json['prevision']
+    new_patient.active      = request.json['active']
+    new_patient.user        = _user
+
+    # Acá sacar la fecha y hora actual.
+    new_patient.registry_date = request.json.get('registry_date', "")
+    
+    # Controlamos error en caso de que se inserte un usuario que ya existe
+    try:
+        new_patient.save()
+    except Exception, e:
+        print e
+        abort(400)
+
+    return jsonify({'resp': 'Done' }), 201       
 
     
 

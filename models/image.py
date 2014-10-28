@@ -3,6 +3,7 @@
 
 from flask.ext.mongoengine import MongoEngine
 from mongoengine import *
+from patient import Patient
 import pymongo, os, json, uuid, hashlib
 
 class Image(Document):
@@ -13,4 +14,4 @@ class Image(Document):
     diagnosis   = StringField(required = True)
     create_date = StringField(required = True)
     groups      = StringField(required = True)
-    # patient     = ReferenceField(Patient)
+    patient     = ReferenceField(Patient)

@@ -14,6 +14,8 @@ class User(Document):
     registry_date   = StringField(required = True)        # Averiguar tipo de dato fecha
     active          = BooleanField(default = True)
 
+    def toString(self):
+        return str(self.id)
 
     def hash_password(self, new_salt = False):
         # uuid is used to generate a random number
