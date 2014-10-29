@@ -102,15 +102,17 @@ def update_user(user_id):
         if 'email' in data:
             to_update['email'] = data['email']
 
-        if 'active' in data:
-            to_update['active'] = data['active']
-
         if 'password' in data:
             to_update['password'] = data['password']
             to_update.hash_password()
+        
+        # ** NO EDITABLE **
+        # if 'active' in data:
+        #     to_update['active'] = data['active']
 
-        if 'registry_date' in data:
-            to_update['registry_date'] = data['registry_date']
+        # ** NO EDITABLE **
+        # if 'registry_date' in data:
+        #     to_update['registry_date'] = data['registry_date']
 
         # En vez de recibir cambio de fecha de registro, es mejor actualizar la fecha, como la fecha en que fue editado el usuario.
 
@@ -186,7 +188,41 @@ def create_patient():
 
     return jsonify({'resp': 'Done' }), 201       
 
+
+@app.route('/api/v1/patients/<patient_id>', methods = ['PUT'])
+def update_patient(patient_id):
+    data = request.json
     
+    try:
+        to_update = Patient.objects.get(id = patient_id)
+        
+        if 'name' in data:
+            to_update['name'] = data['name']
+
+        if 'phone' in data:
+            to_update['phone'] = data['phone']
+        
+        if 'email' in data:
+            to_update['email'] = data['email']
+
+        if 'description' in data:
+            to_update['description'] = data['description']
+
+        if 'groups' in data:
+            to_update['groups'] = data['groups']
+
+        if 'prevision' in data:
+            to_update['prevision'] = data['prevision']
+
+        # En vez de recibir cambio de fecha de registro, es mejor actualizar la fecha, como la fecha en que fue editado el usuario.
+
+        to_update.save()
+
+    except Exception, e:
+        print e
+        return jsonify({'resp': False })
+
+    return jsonify({'resp': True })
 
 
 if __name__ == '__main__':

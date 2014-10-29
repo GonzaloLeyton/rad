@@ -7,14 +7,17 @@ from user import User
 import pymongo, os, json, uuid, hashlib
 
 class Patient(Document):
-    name            = StringField(required = True) 
-    phone           = StringField(required = True)
-    email           = StringField(required = True, unique = True)
-    description     = StringField(required = True)
-    groups          = ListField(required = True)
-    prevision       = StringField(required = True)
-    registry_date   = StringField(required = True)
+    name            = StringField(required = True) 					# Editable
+    phone           = StringField(required = True)					# Editable
+    email           = EmailField(required = True, unique = True)	# Editable
+    description     = StringField(required = True)					# Editable
+    groups          = ListField(required = True)					# Editable
+    prevision       = StringField(required = True)					# Editable
+    registry_date   = StringField(required = True)					
     active          = BooleanField(default = True)
     user            = ReferenceField(User, dbref = False)
+
+    def toString(self):
+        return str(self.id)
 
 Patient.register_delete_rule(User, 'patient', CASCADE)
