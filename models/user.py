@@ -10,7 +10,7 @@ class User(Document):
     name            = StringField(required = True)                  # Editable
     password        = StringField(required = True)                  # Editable
     email           = EmailField(required = True, unique = True)    # Editable
-    registry_date   = StringField(required = True)                  # Averiguar tipo de dato fecha
+    registry_date   = DateTimeField(required = True)                  # Averiguar tipo de dato fecha
     active          = BooleanField(default = True)
 
     def toString(self):

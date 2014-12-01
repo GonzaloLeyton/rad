@@ -13,7 +13,7 @@ class Patient(Document):
     description     = StringField(required = True)					# Editable
     groups          = ListField(required = True)					# Editable
     prevision       = StringField(required = True)					# Editable
-    registry_date   = StringField(required = True)					
+    registry_date   = DateTimeField(required = True)					
     active          = BooleanField(default = True)
     user            = ReferenceField(User, dbref = False)
 

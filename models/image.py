@@ -12,6 +12,6 @@ class Image(Document):
     description = StringField(required = True)
     tags        = StringField(required = True)
     diagnosis   = StringField(required = True)
-    create_date = StringField(required = True)
+    create_date = DateTimeField(required = True)
     groups      = StringField(required = True)
     patient     = ReferenceField(Patient)

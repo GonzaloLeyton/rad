@@ -9,7 +9,7 @@ from flask import Flask, jsonify, request, make_response, abort
 from flask.ext.mongoengine import MongoEngine
 from flask.ext.httpauth import HTTPBasicAuth
 from mongoengine import *
-import pymongo, os, json, uuid, hashlib
+import pymongo, os, json, uuid, hashlib, datetime
 from models.user import User
 from models.patient import Patient
 from models.image import Image
@@ -76,7 +76,8 @@ def create_user():
     new_user.hash_password()
 
     # Acá sacar la fecha y hora actual.
-    new_user.registry_date = request.json.get('registry_date', "")
+    current_time = datetime.datetime.now()
+    new_user.registry_date = request.json.get('registry_date', current_time)
     
     # Controlamos error en caso de que se inserte un usuario que ya existe
     try:
@@ -115,7 +116,10 @@ def update_user(user_id):
         #     to_update['registry_date'] = data['registry_date']
 
         # En vez de recibir cambio de fecha de registro, es mejor actualizar la fecha, como la fecha en que fue editado el usuario.
+        current_time = datetime.datetime.now()
+        to_update['registry_date'] = current_time
 
+        # Salvamos usuario
         to_update.save()
 
     except Exception, e:
@@ -226,5 +230,6 @@ def update_patient(patient_id):
 
 
 if __name__ == '__main__':
-    app.run(debug = True)
+    # app.run(debug = True)
     # app.run(debug = True, port=50100)
+    app.run(host=os.getenv('IP', '0.0.0.0'),port=int(os.getenv('PORT', 8080))) # Configuracion para que c9 pueda levantar servicios
