@@ -35,7 +35,6 @@ def verify_password(username, password):
     return resp
 
 
-
 # Recordar cambiar el código de error de 403 a 401 (cuando el servicio sea consumido por apps)
 @auth.error_handler
 def unauthorized():
@@ -52,19 +51,22 @@ def login():
     
     try:
         user = User.objects.get(email=login_user_email)
+        resp = user.check_password(login_user_password)
+        if resp:
+            item = {
+                "id"            : user.toString(),
+                "name"          : user.name,
+                "email"         : user.email,
+                "active"        : user.active,
+                "registry_date" : user.registry_date
+            }
+            return jsonify({'resp': True, 'error': 0, 'user': item })
 
+        else:
+            return jsonify({'resp': False, 'error': 'Invalid Password' })
+    
     except Exception, e:
-        return jsonify({ 'error': 'Invalid Username' })
-    
-    
-    resp = verify_password(login_user_email, login_user_password)
-    
-    if resp:
-        return jsonify({'resp': True })
-
-    else:
-        return jsonify({ 'error': 'Invalid Password' })
-    
+        return jsonify({'resp': False, 'error': 'Invalid Username' })
 
 
 @app.route('/api/v1/users', methods = ['GET'])
@@ -83,8 +85,27 @@ def get_users():
         }
         resp.append(item)
 
-    return jsonify({'users': resp })
+    return jsonify({'users': resp, 'resp': True, 'error' : 0 })
 
+
+@app.route('/api/v1/users/<user_id>', methods = ['GET'])
+@auth.login_required
+def get_one_user(user_id):
+    try:
+        user = User.objects.get(id=user_id)
+    except Exception, e:
+        return jsonify({'resp': False, 'error' : 'Invalid User id'})
+
+    item = {
+        "id"            : user.toString(),
+        "name"          : user.name,
+        "email"         : user.email,
+        "active"        : user.active,
+        "registry_date" : user.registry_date,
+        "password"      : user.password
+    }
+
+    return jsonify({'users': item, 'resp': True, 'error' : 0})
 
 
 @app.route('/api/v1/users', methods = ['POST'])
@@ -111,11 +132,11 @@ def create_user():
         print e
         abort(400)
 
-    return jsonify({'resp': 'Done' }), 201
-
+    return jsonify({'resp': True, 'error' : 0 }), 201
 
 
 @app.route('/api/v1/users/<user_id>', methods = ['PUT'])
+@auth.login_required
 def update_user(user_id):
     data = request.json
     
@@ -156,7 +177,6 @@ def update_user(user_id):
 
 ##### ==== PATIENT ==== ######
 
-
 @app.route('/api/v1/patients', methods=['GET'])
 @auth.login_required
 def get_patients():
@@ -165,7 +185,6 @@ def get_patients():
 
     resp = []
     patients = Patient.objects.filter(user = _user)
-
 
     for p in patients:
         item = {
