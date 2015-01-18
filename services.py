@@ -42,6 +42,31 @@ def unauthorized():
     return make_response(jsonify({ 'error': 'Unauthorized access' } ), 403) 
 
 
+@app.route('/api/v1/login', methods = ['POST'])
+def login():
+    if not request.json or not 'email' in request.json:
+        abort(400)
+        
+    login_user_email = request.json['email']
+    login_user_password = request.json['password']
+    
+    try:
+        user = User.objects.get(email=login_user_email)
+
+    except Exception, e:
+        return jsonify({ 'error': 'Invalid Username' })
+    
+    
+    resp = verify_password(login_user_email, login_user_password)
+    
+    if resp:
+        return jsonify({'resp': True })
+
+    else:
+        return jsonify({ 'error': 'Invalid Password' })
+    
+
+
 @app.route('/api/v1/users', methods = ['GET'])
 @auth.login_required
 def get_users():
