@@ -302,7 +302,7 @@ def update_patient(patient_id):
 
 
 if __name__ == '__main__':
-    app.run()
-    # app.run(debug=True)
+    # app.run()
+    app.run(debug=True)
     # app.run(debug = True, port=50100)
     # app.run(host=os.getenv('IP', '0.0.0.0'),port=int(os.getenv('PORT', 8080))) # Configuracion para que c9 pueda levantar servicios
