@@ -18,7 +18,7 @@ app = Flask(__name__)
 auth = HTTPBasicAuth()
 
 # Nos conectamos a la base de datos y 
-connect('imageApp')
+connect('imageApp', host=ENV['MONGOLAB_URI'])
 
 ##### ==== USERS ==== ######
 
