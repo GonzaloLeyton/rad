@@ -64,6 +64,11 @@ def unauthorized():
     return make_response(jsonify({ 'error': 'Unauthorized access' } ), 403) 
 
 
+
+@app.route('/')
+def hello():
+    return "Hello World!"
+
 @app.route('/api/v1/login', methods = ['POST'])
 def login():
     if not request.json or not 'email' in request.json:
