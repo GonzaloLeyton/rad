@@ -22,7 +22,8 @@ app = Flask(__name__)
 auth = HTTPBasicAuth()
 
 # Nos conectamos a la base de datos y 
-connect('imageApp', host=ENV['MONGOLAB_URI'])
+# connect('imageApp')
+connect('heroku_9tn5qt67', host=ENV['MONGOLAB_URI'])
 
 
 @app.before_first_request
