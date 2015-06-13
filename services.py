@@ -13,12 +13,34 @@ import pymongo, os, json, uuid, hashlib, datetime
 from models.user import User
 from models.patient import Patient
 from models.image import Image
+import rollbar
+import rollbar.contrib.flask
+from flask import got_request_exception
+
 
 app = Flask(__name__)
 auth = HTTPBasicAuth()
 
 # Nos conectamos a la base de datos y 
 connect('imageApp', host=ENV['MONGOLAB_URI'])
+
+
+@app.before_first_request
+def init_rollbar():
+    """init rollbar module"""
+    rollbar.init(
+        # access token for the demo app: https://rollbar.com/demo
+        '4007dbacf03f426ab291c36da97da1e6',
+        # environment name
+        'production',
+        # server root directory, makes tracebacks prettier
+        root=os.path.dirname(os.path.realpath(__file__)),
+        # flask already sets up logging
+        allow_logging_basic_config=False)
+
+    # send exceptions from `app` to rollbar, using flask's signal system.
+    got_request_exception.connect(rollbar.contrib.flask.report_exception, app)
+
 
 ##### ==== USERS ==== ######
 
@@ -274,6 +296,7 @@ def update_patient(patient_id):
 
 
 if __name__ == '__main__':
-    # app.run(debug = True)
+    app.run()
+    # app.run(debug=True)
     # app.run(debug = True, port=50100)
-    app.run(host=os.getenv('IP', '0.0.0.0'),port=int(os.getenv('PORT', 8080))) # Configuracion para que c9 pueda levantar servicios
+    # app.run(host=os.getenv('IP', '0.0.0.0'),port=int(os.getenv('PORT', 8080))) # Configuracion para que c9 pueda levantar servicios
