@@ -23,7 +23,7 @@ auth = HTTPBasicAuth()
 
 # Nos conectamos a la base de datos y 
 # connect('imageApp')
-connect('heroku_9tn5qt67', host=ENV['MONGOLAB_URI'])
+connect('heroku_9tn5qt67', host="mongodb://heroku_9tn5qt67:8hc5s5cijoiue6i7de7bbt9to@ds031277.mongolab.com:31277/heroku_9tn5qt67")
 
 
 @app.before_first_request
